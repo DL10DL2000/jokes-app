@@ -3,17 +3,159 @@
 <head>
   <meta charset="UTF-8">
   <title>בדיחות בעברית</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      direction: rtl;
+      text-align: center;
+      background-color: #fffde7;
+      color: #3e2723;
+      padding: 40px;
+      margin: 0;
+    }
+
+    #app {
+      max-width: 600px;
+      margin: auto;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 18px;
+      margin-top: 20px;
+    }
+
+    select {
+      font-size: 18px;
+      padding: 5px 10px;
+      margin-bottom: 20px;
+    }
+
+    p#joke {
+      font-size: 20px;
+      margin: 30px 0;
+      min-height: 80px;
+      padding: 10px;
+      background-color: #fff8dc;
+      border-radius: 8px;
+      border: 1px solid #ffe082;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin: 10px;
+      background-color: #ffecb3;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #ffe082;
+    }
+  </style>
 </head>
-<body dir="rtl">
+<body>
   <div id="app">
-    <h1>🤣 בדיחות יפות בעברית</h1>
+    <h1>🤣 מאגר בדיחות בעברית</h1>
+
+    <label for="categorySelect">בחר קטגוריה:</label>
+    <select id="categorySelect">
+      <option value="חיות">חיות</option>
+      <option value="משפחה">משפחה</option>
+      <option value="טכנולוגיה">טכנולוגיה</option>
+      <option value="אוכל">אוכל</option>
+      <option value="שטויות שנונות">שטויות שנונות</option>
+    </select>
+
     <p id="joke">לחץ על הכפתור לבדיחה!</p>
-    <div class="buttons">
-      <button id="nextBtn">בדיחה הבאה</button>
-      <button id="shareBtn">שתף בדיחה</button>
-    </div>
+
+    <button id="nextBtn">בדיחה הבאה</button>
+    <button id="shareBtn">שתף בדיחה</button>
   </div>
-  <script src="script.js"></script>
+
+  <script>
+    const jokesByCategory = {
+      "חיות": [
+        "למה תרנגול לא הולך לבית ספר? כי הוא כבר עבר את הביצה!",
+        "איך קוראים לדבורה שמתאמנת בחדר כושר? דבו-רץ!",
+        "מה עושה גמל במדבר? מתייבש בכבוד!",
+        "איך קוראים לנחש בלי חברים? בדיד-נחש!",
+        "איך קוראים לדג עם תואר שני? דג-מאסטר!"
+      ],
+      "משפחה": [
+        "אבא: למה אתה לא מסדר את החדר? בן: לא רוצה להרוס את הבלגן האומנותי.",
+        "מה אומר עט לפנקס? תכתיב לי את הרגשות שלך.",
+        "ילד: אבא, אפשר לקבל 100 שקל? אבא: למה, אתה רוצה לקנות חברה חדשה?"
+      ],
+      "טכנולוגיה": [
+        "מה עושה טלפון כשהוא עצוב? נכנס למצב שקט.",
+        "איך קוראים לפיל שלומד תכנות? אלגורתיל!",
+        "למה מחשב טוב בלספר בדיחות? כי הוא תמיד מעבד אותן טוב!",
+        "איך קוראים לטוסטר שרוצה להיות די.ג'יי? טוסט-בוקסה!"
+      ],
+      "אוכל": [
+        "מה עושה עכבר כשהוא צופה בסרט אימה? נלחץ על גבינה!",
+        "מה אומר הטוסט כשהוא מתאהב? נמסתי בשבילך.",
+        "איך קוראים לגרב שחלמה להיות עוגייה? קפקייק־גרבית!"
+      ],
+      "שטויות שנונות": [
+        "מה עושה נזלת ביום חופש? מטייל באף.",
+        "איך קוראים לשחקן כדורגל עם נעל אחת? חצי הרכב.",
+        "אמרתי לחבר שלי שהוא שקוף — הוא נעלב בלי שאדע בכלל.",
+        "למה שעון לא יוצא לפנסיה? כי הזמן לא עוצר.",
+        "מה עונה כסא לאדם שרוצה לקום? תעשה לי טובה, שב!",
+        "אם החיים נותנים לך לימון — תבנה לו פרופיל באינסטגרם ותגיד שהוא גיבור חמצמץ.",
+        "מה עושה קלמר שפתאום מבין שהוא ריק? משבר עפרונות קיומי.",
+        "מה אומר טיפקס למחק? אתה מוחק את העבר — אני רק משכתב אותו.",
+        "איך קוראים לאוזניות עצבניות? סטריאו־דרמה."
+      ]
+    };
+
+    let category = "חיות";
+    let index = 0;
+    let intervalId = null;
+
+    const jokeEl = document.getElementById("joke");
+    const nextBtn = document.getElementById("nextBtn");
+    const shareBtn = document.getElementById("shareBtn");
+    const categorySelect = document.getElementById("categorySelect");
+
+    function showJoke() {
+      const jokes = jokesByCategory[category];
+      jokeEl.textContent = jokes[index];
+      index = (index + 1) % jokes.length;
+    }
+
+    function startTimer() {
+      clearInterval(intervalId);
+      intervalId = setInterval(showJoke, 120000);
+    }
+
+    nextBtn.addEventListener("click", showJoke);
+
+    shareBtn.addEventListener("click", () => {
+      const text = jokeEl.textContent;
+      const encoded = encodeURIComponent(text);
+      window.open(`https://wa.me/?text=${encoded}`, "_blank");
+    });
+
+    categorySelect.addEventListener("change", () => {
+      category = categorySelect.value;
+      index = 0;
+      showJoke();
+      startTimer();
+    });
+
+    showJoke();
+    startTimer();
+  </script>
 </body>
 </html>
